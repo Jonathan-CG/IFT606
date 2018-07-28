@@ -14,12 +14,12 @@ class Neighbour:
 if __name__ == "__main__":
     print([(s.connect(('8.8.8.8', 53)), s.getsockname()[0], s.close()) for s in [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1])
     #HARDCODED - through ifconfig, need to figure out local adress/mask
-    nmapOutput = subprocess.check_output(["nmap", "-p", "22", "10.44.88.*"])
+    #nmapOutput = subprocess.check_output(["nmap", "-p", "22", "10.44.88.*"])
+    nmapOutput = subprocess.check_output(["nmap", "-p", "22", "-oG", "-", "192.168.0.*"])
     nmapString = nmapOutput.decode("utf-8")
-    listedNmapString = nmapString.splitlines()
-    del listedNmapString[-1]
-    del listedNmapString[0]
-    del listedNmapString[0]
+    print(nmapString)
+    listedNmapString = filter(lambda x: "open" in x, nmapString.splitlines())
+    print(listedNmapString)
     neighbours  = []
     i = 0
     for entry in listedNmapString:
