@@ -70,5 +70,6 @@ else:
 try:
 	onSenCaliss = input('Appuyez sur nimporte quel touche pour Quitter (DEBUGGING PURPOSES, A ENLEVER)')
 except:
+	pass
 finally:
 	exit()
