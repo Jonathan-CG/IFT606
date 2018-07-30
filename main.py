@@ -67,7 +67,7 @@ else:
 	print('ErrorOccured = true')
 	print('Unknown error occured. Retrying later...')
 
-input('Appuyez sur nimporte quel touche pour Quitter (DEBUGGING PURPOSES, A ENLEVER)')
+onSenCaliss = input('Appuyez sur nimporte quel touche pour Quitter (DEBUGGING PURPOSES, A ENLEVER)')
 exit()
     
 
