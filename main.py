@@ -69,7 +69,3 @@ else:
 
 onSenCaliss = input('Appuyez sur nimporte quel touche pour Quitter (DEBUGGING PURPOSES, A ENLEVER)')
 exit()
-    
-
-
-print('Hello world!')
