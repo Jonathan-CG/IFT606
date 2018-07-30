@@ -67,7 +67,7 @@ else:
 	print('ErrorOccured = true')
 	print('Unknown error occured. Retrying later...')
 
-input("Appuyez sur n'importe quel touche pour Quitter (DEBUGGING PURPOSES, À ENLEVER)")
+input('Appuyez sur nimporte quel touche pour Quitter (DEBUGGING PURPOSES, À ENLEVER)')
 exit()
     
 
