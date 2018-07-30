@@ -72,4 +72,5 @@ try:
 except:
 	pass
 finally:
-	exit()
+	from sys import exit
+	exit(0) # Successful exit
