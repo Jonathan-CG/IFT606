@@ -43,6 +43,8 @@ nmapOutput = subprocess.check_output(["nmap", "-p", "22", "-oG", "-", "192.168.0
 nmapOutput = nmapOutput.decode("utf-8")
 listedNmapString = list(filter(lambda x: "open" in x, nmapOutput.splitlines()))
 
+del listedNmapString[0]
+
 for entry in listedNmapString:
 	ip = entry.split()[1]
 	host = ip
