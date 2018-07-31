@@ -44,7 +44,7 @@ nmapOutput = nmapOutput.decode("utf-8")
 listedNmapString = list(filter(lambda x: "open" in x, nmapOutput.splitlines()))
 
 for entry in listedNmapString:
-    ip = entry.split()[1]
+	ip = entry.split()[1]
 	host = ip
 	dataDecoded = None
 	errorOccured = False
