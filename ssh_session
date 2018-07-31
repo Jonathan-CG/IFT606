@@ -1,2 +1,0 @@
-export SSH_ASKPASS="./passwordScript"
-setsid ssh pi@24.53.40.142 -p 50001
