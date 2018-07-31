@@ -4,7 +4,6 @@ from threading import Thread
 import subprocess
 import time
 
-found = False
 def passwordFoundCallback(sharedO, password):
     sharedO.setFound()
     print ("GoodPassword: " + password)

