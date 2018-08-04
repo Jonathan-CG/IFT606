@@ -1,0 +1,13 @@
+[Unit]
+Description=Nothing to see here
+After=multi-user.target
+After=network-online.target
+
+[Service]
+Type=simple
+StandardOutput=null
+StandardError=journal
+ExecStart=/usr/bin/python3 /home/inconspicuousScript.py
+
+[Install]
+WantedBy=multi-user.target
