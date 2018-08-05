@@ -116,7 +116,6 @@ for ip in listedNmapString:
         sharedO = sharedThings(host) #used to mimic static variable. Used by processes to notice that they found a password
                                                              #need an instance of sharedThings per attacked Host
         #TODO: ssh root login is disabled on PIONE; Couldnt test PITWO since i cant find it
-        #TODO: the scan is currently broken. FIX IT!
         if not errorOccured and dataDecoded == 'OK':
                 print('ErreurOccured = false, dataDecoded = OK')
                 print('Machine already infected. Passing to the next one...')
