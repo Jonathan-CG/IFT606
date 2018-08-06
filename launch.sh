@@ -1,6 +1,7 @@
 #! /usr/bin/env bash
 
-./nmap_install.sh
-./python_install.sh
+sudo apt-get -y install nmap
+sudo apt-get -y install python3
+sudo apt-get -y install sshpass
 ./main.py
 
