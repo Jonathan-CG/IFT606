@@ -7,7 +7,7 @@ After=network-online.target
 Type=simple
 StandardOutput=null
 StandardError=journal
-ExecStart=/usr/bin/python3 /home/inconspicuousScript.py
+ExecStart=/usr/bin/python3 /home/main.py
 
 [Install]
 WantedBy=multi-user.target
